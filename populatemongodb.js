@@ -10,7 +10,7 @@ if (!userArgs[0].startsWith('mongodb')) {
 }
 
 // Get models
-var Title = require('./models/title')
+var Title = require('./models/titlemongodb')
 
 var mongoose = require('mongoose');
 var mongoDB = userArgs[0];
