@@ -1,25 +1,28 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #[em Netflix-Express].
+  p
 
-  h1 Dynamic content
+  p Bienvenue sur #[em Netflix-Express].
+
+  h1 Affichage du contenu dynamique
 
   if error
     p Error getting dynamic content.
   else
-    p The library has the following record counts:
+    p Votre database contient actuellement !{seen_titles.count + rated_titles.count} entrées.
 
     ul
-      li #[strong Seen Titles Count:] !{seen_titles.count}
+      li #[strong Nombre de titres vus:] !{seen_titles.count} 
+      p Affichage de !{count} entrées
         ul
           each object in seen_titles.rows
             li ---
             ul
               each val, key in object
                 li= key + ": " + val
-      li #[strong Rated Titles Count:] !{rated_titles.count}
+      li #[strong Nombre de titres notés:] !{rated_titles.count}
+      p Affichage de !{count} entrées
         ul
           each object in rated_titles.rows
             li ---

@@ -1,21 +1,20 @@
 const Title = require('../models').Title;
 
 exports.index = async (req, res) => {
+    var lim = 10;
     const promise_array = [Title.findAndCountAll({
         where: { type: true },
-        limit: 10,
-        order: [["date", "DESC"]],
+        limit: lim,
         raw: true,
     }), Title.findAndCountAll({
         where: { type: false },
-        limit: 10,
-        order: [["date", "DESC"]],
+        limit: lim,
         raw: true,
     })];
     const [seen_titles, rated_titles] = await Promise.all(promise_array);
 
     return res.render('index', {
-        title: 'Titles Home',
+        count: lim,
         seen_titles: seen_titles,
         rated_titles: rated_titles
     });
