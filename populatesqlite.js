@@ -1,16 +1,17 @@
 #! /usr/bin/env node
+'use strict';
 
 console.log('This script populates Netflix JSON files to your database.');
 
-const { Sequelize } = require('sequelize');
-const async = require('async');
-var app = require('./app');
+const { Sequelize, Op } = require('sequelize');
 
+// Connection à la database
 const sequelize = new Sequelize('database', 'username', 'password', {
     dialect: 'sqlite',
     storage: 'data/database.sqlite3', // or ':memory:'
 });
 
+// Vérification de la connection
 (async () => {
     try {
         await sequelize.authenticate();
@@ -19,6 +20,7 @@ const sequelize = new Sequelize('database', 'username', 'password', {
         console.error('Unable to connect to the database:', error);
     }
 })();
+
 
 async function updateOrCreateEntry(model, where, newItem) {
     // First try to find the record
@@ -30,43 +32,88 @@ async function updateOrCreateEntry(model, where, newItem) {
     }
     // Found an item, update it
     // const item = await model.update(newItem, { where, returning: true, plain: true});
-    // updatedAt est mis à jour automatiquement
+    // updatedAt est mis à jour automatiquement si un changement est effectué sur l'entrée
     const item = await foundItem.update(newItem, { fields: ["date"] })
     return { item, wasCreated: false };
 }
 
-async function updateOrCreateJSON(json_path, is_seen) {
-    const ObjectArray = require('./migrate_from_json')(json_path, is_seen);
-    async.each(ObjectArray, async (entry, callback) => {
-        await updateOrCreateEntry(Title, {
+
+async function updateOrCreateJSON(ObjectArray) {
+    console.log("Updating database.");
+    // Loop over JSON entries stored in ObjectArray and updateOrCreateEntry
+    const loadPromises = ObjectArray.map(entry => {
+        updateOrCreateEntry(Title, {
             name: entry.name,
             type: entry.type,
         }, {
             name: entry.name,
             date: entry.date,
-            type: entry.type ? "Seen": "Rated",
+            type: entry.type ? "Seen" : "Rated",
             createdAt: entry.createdAt
-        }).then(result => {
-            console.log("Entry:", entry.name, "\nWas created:", result.wasCreated);
-            if (result.wasCreated)
-                console.log(result.item.dataValues);
-        }).catch(err => {
-            // print the error details
-            callback(console.log(err));
-        });
-    }, err => {
-        if (err) {
-            // One of the iterations produced an error.
-            // All processing will now stop.
-            console.log('An entry failed to process: ', err);
-        } else {
-            console.log('All entries have been processed successfully');
-        }
+        })
     });
+    await Promise.all(loadPromises);
+}
+
+
+async function CreateJSON(ObjectArray, is_seen) {
+    // renvoie les éléments présents dans database et le fichier JSON
+    const titles = await Title.findAll({
+        where: {
+            type: {
+                [Op.in]: ObjectArray.map((item) => item.type),
+            },
+            name: {
+                [Op.in]: ObjectArray.map((item) => item.name),
+            },
+        }, raw: true
+    });
+    // console.log(titles);
+
+    // once we get titles continue on
+    // flag wasCreated
+    let wasCreated = false;
+    if (!(Array.isArray(titles) && titles.length)) {
+        // Aucune entrée du fichier JSON n'est présente dans la database
+        console.log("Repopulating Database");
+        wasCreated = true;
+
+        // transaction delete and create (same as migration)
+        let transaction;
+        try {
+            // get transaction
+            transaction = await sequelize.transaction();
+
+            // par sécurité on supprime les entrées du fichier JSON
+            await Title.destroy({ where: { type: is_seen }, transaction: transaction });
+            await Title.bulkCreate(ObjectArray.map(item => {
+                return {
+                    name: item.name,
+                    date: item.date,
+                    type: item.type ? "Seen" : "Rated",
+                }
+            }), { transaction: transaction, validate: true });
+
+            await transaction.commit();
+        } catch (err) {
+            console.log("Erreur de transaction.");
+            // Rollback transaction only if the transaction object is defined
+            if (transaction) await transaction.rollback();
+        }
+    }
+    return { titles, wasCreated };
+}
+
+
+async function processJSON(ObjectArray, is_seen) {
+    let res = await CreateJSON(ObjectArray, is_seen);
+    // once we get res continue on
+    if (!(res.wasCreated))
+        await updateOrCreateJSON(ObjectArray)
 }
 
 // Get models
-var Title = app.get('models').Title;
+const Title = require('./models').Title;
 
 // Get JSON files
 var json_rated_path = './data/rated_titles.json';
@@ -75,6 +122,12 @@ var json_seen_path = './data/seen_titles.json';
 (async () => {
     await sequelize.sync({ force: true });
     // Code here
-    await updateOrCreateJSON(json_rated_path, false);
-    await updateOrCreateJSON(json_seen_path, true);
+    try {
+        const RatedArray = require('./migrate_from_json')(json_rated_path, false);
+        const SeenArray = require('./migrate_from_json')(json_seen_path, true);
+
+        await Promise.all([processJSON(RatedArray, false), processJSON(SeenArray, true)]);
+    } catch (err) {
+        console.error("Loading Error:", err);
+    };
 })();

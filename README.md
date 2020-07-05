@@ -23,6 +23,11 @@ Entrer les données des fichiers JSON dans la database.
 node_modules/.bin/sequelize db:seed:all --debug  # fill database with JSON
 ```
 
+Mettre à jour les entrées JSON modifiées (ajoûts d'entrées ou modification de date). Si aucune entrée du fichier JSON n'est déjà présente dans la database, les entrées de la database ayant l'attribut `type` du fichier JSON sont supprimées et le contenu du fichier JSON est inséré dans la database.
+```bash
+node populatesqlite.js
+```
+
 ## Useful commands
 
 ```bash

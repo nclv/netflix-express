@@ -7,8 +7,8 @@ module.exports = (json_file_path, title_type) => {
             name: jsonData[dateString],
             date: dateString,
             type: title_type,
-            createdAt: new Date().toDateString(),
-            updatedAt: new Date().toDateString()
+            createdAt: new Date(),  // nécessaire pour les seeders
+            updatedAt: new Date()  // nécessaire pour les seeders
         };
         console.log(title);
         ObjectArray.push(title);

@@ -2,4 +2,27 @@ extends layout
 
 block content
   h1= title
-  p Welcome to #{title}
+  p Welcome to #[em Netflix-Express].
+
+  h1 Dynamic content
+
+  if error
+    p Error getting dynamic content.
+  else
+    p The library has the following record counts:
+
+    ul
+      li #[strong Seen Titles Count:] !{seen_titles.count}
+        ul
+          each object in seen_titles.rows
+            li ---
+            ul
+              each val, key in object
+                li= key + ": " + val
+      li #[strong Rated Titles Count:] !{rated_titles.count}
+        ul
+          each object in rated_titles.rows
+            li ---
+            ul
+              each val, key in object
+                li= key + ": " + val
