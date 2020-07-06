@@ -1,26 +1,15 @@
-#! /usr/bin/env node
 'use strict';
 
-console.log('This script populates Netflix JSON files to your database.');
+const { Op } = require('sequelize');
 
-const { Sequelize, Op } = require('sequelize');
+// Get models
+const models = require('./models');
 
-// Connection à la database
-const sequelize = new Sequelize('database', 'username', 'password', {
-    dialect: 'sqlite',
-    storage: 'data/database.sqlite3', // or ':memory:'
-});
-
-// Vérification de la connection
-(async () => {
-    try {
-        await sequelize.authenticate();
-        console.log('Connection has been established successfully.');
-    } catch (error) {
-        console.error('Unable to connect to the database:', error);
-    }
-})();
-
+// // Connection à la database (effectué dans models/index.js)
+// const sequelize = new Sequelize('database', 'username', 'password', {
+//     dialect: 'sqlite',
+//     storage: 'data/database.sqlite3', // or ':memory:'
+// });
 
 async function updateOrCreateEntry(model, where, newItem) {
     // First try to find the record
@@ -42,7 +31,7 @@ async function updateOrCreateJSON(ObjectArray) {
     console.log("Updating database.");
     // Loop over JSON entries stored in ObjectArray and updateOrCreateEntry
     const loadPromises = ObjectArray.map(entry => {
-        updateOrCreateEntry(Title, {
+        updateOrCreateEntry(models.Title, {
             name: entry.name,
             type: entry.type,
         }, {
@@ -58,7 +47,7 @@ async function updateOrCreateJSON(ObjectArray) {
 
 async function CreateJSON(ObjectArray, is_seen) {
     // renvoie les éléments présents dans database et le fichier JSON
-    const titles = await Title.findAll({
+    const titles = await models.Title.findAll({
         where: {
             type: {
                 [Op.in]: ObjectArray.map((item) => item.type),
@@ -82,11 +71,11 @@ async function CreateJSON(ObjectArray, is_seen) {
         let transaction;
         try {
             // get transaction
-            transaction = await sequelize.transaction();
+            transaction = await models.sequelize.transaction();
 
             // par sécurité on supprime les entrées du fichier JSON
-            await Title.destroy({ where: { type: is_seen }, transaction: transaction });
-            await Title.bulkCreate(ObjectArray.map(item => {
+            await models.Title.destroy({ where: { type: is_seen }, transaction: transaction });
+            await models.Title.bulkCreate(ObjectArray.map(item => {
                 return {
                     name: item.name,
                     date: item.date,
@@ -112,22 +101,4 @@ async function processJSON(ObjectArray, is_seen) {
         await updateOrCreateJSON(ObjectArray)
 }
 
-// Get models
-const Title = require('./models').Title;
-
-// Get JSON files
-var json_rated_path = './data/rated_titles.json';
-var json_seen_path = './data/seen_titles.json';
-
-(async () => {
-    await sequelize.sync({ force: true });
-    // Code here
-    try {
-        const RatedArray = require('./migrate_from_json')(json_rated_path, false);
-        const SeenArray = require('./migrate_from_json')(json_seen_path, true);
-
-        await Promise.all([processJSON(RatedArray, false), processJSON(SeenArray, true)]);
-    } catch (err) {
-        console.error("Loading Error:", err);
-    };
-})();
+exports.processJSON = processJSON;

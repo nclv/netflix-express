@@ -11,12 +11,16 @@ exports.index = async (req, res) => {
         limit: lim,
         raw: true,
     })];
-    const [seen_titles, rated_titles] = await Promise.all(promise_array);
-
-    return res.render('index', {
-        count: lim,
-        seen_titles: seen_titles,
-        rated_titles: rated_titles
+    await Promise.all(promise_array).then(([seen_titles, rated_titles]) => {
+        res.render('index', {
+            printed_count: lim,
+            seen_titles: seen_titles.rows,
+            seen_titles_count: seen_titles.count,
+            rated_titles: rated_titles.rows,
+            rated_titles_count: rated_titles.count,
+        });
+    }).catch(err => {
+        console.log("Erreur du chargement des données", err);
     });
 };
 

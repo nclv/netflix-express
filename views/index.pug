@@ -1,8 +1,8 @@
 extends layout
+include mixins/_tableRow
 
 block content
-  p
-
+  br
   p Bienvenue sur #[em Netflix-Express].
 
   h1 Affichage du contenu dynamique
@@ -10,22 +10,35 @@ block content
   if error
     p Error getting dynamic content.
   else
-    p Votre database contient actuellement !{seen_titles.count + rated_titles.count} entrées.
+    p Votre database contient actuellement !{seen_titles_count + rated_titles_count} entrées.
 
     ul
-      li #[strong Nombre de titres vus:] !{seen_titles.count} 
-      p Affichage de !{count} entrées
-        ul
-          each object in seen_titles.rows
-            li ---
-            ul
-              each val, key in object
-                li= key + ": " + val
-      li #[strong Nombre de titres notés:] !{rated_titles.count}
-      p Affichage de !{count} entrées
-        ul
-          each object in rated_titles.rows
-            li ---
-            ul
-              each val, key in object
-                li= key + ": " + val
+      li #[strong Nombre de titres vus:] !{seen_titles_count} 
+      p Affichage de !{printed_count} entrées.
+        br
+        .ui.container
+          table.ui.celled.table.center.aligned
+            thead
+              tr
+                th  Nom
+                th  Date
+            tbody
+              each title in seen_titles
+                +tableRow(title)
+            tfoot
+              tr
+                th(colspan='2')
+      li #[strong Nombre de titres notés:] !{rated_titles_count}
+      p Affichage de !{printed_count} entrées.
+        .ui.container
+          table.ui.celled.table.center.aligned
+            thead
+              tr
+                th  Nom
+                th  Date
+            tbody
+              each title in rated_titles
+                +tableRow(title)
+            tfoot
+              tr
+                th(colspan='2')

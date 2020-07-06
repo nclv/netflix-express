@@ -10,7 +10,7 @@ module.exports = (json_file_path, title_type) => {
             createdAt: new Date(),  // nécessaire pour les seeders
             updatedAt: new Date()  // nécessaire pour les seeders
         };
-        console.log(title);
+        // console.log(title);
         ObjectArray.push(title);
     }
     return ObjectArray;
