@@ -25,8 +25,15 @@ exports.index = async (req, res) => {
 };
 
 // Display list of all Titles.
-exports.titles_list = function (req, res) {
-    res.send('NOT IMPLEMENTED: Titles list');
+exports.titles_list = (req, res) => {
+    Title.findAll({raw: true}).then(titles => {
+        res.render("title_list", {
+            title: "Entrées présentes dans la database", 
+            titles_list: titles,
+        });
+    }).catch(err => {
+        console.log("Erreur du chargement des données", err);
+    });
 };
 
 // Display detail page for a specific Title.

@@ -1,0 +1,20 @@
+include _tableRow
+
+mixin table(titles_list, type)
+    br
+    .ui.container
+        table#table.ui.celled.table.center.aligned
+            thead
+                tr
+                    th  Nom
+                    th  Date
+                    if type
+                        th  Type
+            tbody
+                each title in titles_list
+                    +tableRow(title, type)
+                else
+                    li Il n'y a pas d'entrées dans la database.
+            tfoot
+                tr
+                    th(colspan='2')

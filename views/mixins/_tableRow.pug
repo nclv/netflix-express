@@ -1,4 +1,6 @@
-mixin tableRow(title)
+mixin tableRow(title, type)
     tr
         td= title.name
         td= title.date
+        if type
+            td= title.type ? "Seen" : 'Rated'

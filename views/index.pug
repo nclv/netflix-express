@@ -1,5 +1,5 @@
 extends layout
-include mixins/_tableRow
+include mixins/_table
 
 block content
   br
@@ -15,30 +15,7 @@ block content
     ul
       li #[strong Nombre de titres vus:] !{seen_titles_count} 
       p Affichage de !{printed_count} entrées.
-        br
-        .ui.container
-          table.ui.celled.table.center.aligned
-            thead
-              tr
-                th  Nom
-                th  Date
-            tbody
-              each title in seen_titles
-                +tableRow(title)
-            tfoot
-              tr
-                th(colspan='2')
+        +table(seen_titles, false)
       li #[strong Nombre de titres notés:] !{rated_titles_count}
       p Affichage de !{printed_count} entrées.
-        .ui.container
-          table.ui.celled.table.center.aligned
-            thead
-              tr
-                th  Nom
-                th  Date
-            tbody
-              each title in rated_titles
-                +tableRow(title)
-            tfoot
-              tr
-                th(colspan='2')
+        +table(rated_titles, false)

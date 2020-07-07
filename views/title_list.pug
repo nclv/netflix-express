@@ -1,0 +1,44 @@
+extends layout
+include mixins/_table
+
+block content
+    br
+    p #[em !{title}].
+    
+    //- titles_list.sort((title1, title2) => datesSortFunction(title2, title1))
+    script(type='text/javascript', charset='utf8', src="https://code.jquery.com/jquery-3.5.1.js")
+    
+    link(rel='stylesheet', type='text/css', href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css")
+    script(type='text/javascript', charset='utf8', src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js")
+    script(type='text/javascript', charset='utf8', src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js")
+
+    //- Fixed Header
+    link(rel="stylesheet", type='text/css', href="https://cdn.datatables.net/fixedheader/3.1.7/css/fixedHeader.bootstrap4.min.css")
+    script(type='text/javascript', charset='utf8', src="https://cdn.datatables.net/fixedheader/3.1.7/js/dataTables.fixedHeader.min.js")
+    
+    //- Responsive
+    //- link(rel='stylesheet', type='text/css', href="https://cdn.datatables.net/responsive/2.2.5/css/responsive.bootstrap4.min.css")
+    //- script(type='text/javascript', charset='utf8', src="https://cdn.datatables.net/responsive/2.2.5/js/dataTables.responsive.min.js")
+    //- script(type='text/javascript', charset='utf8', src="https://cdn.datatables.net/responsive/2.2.5/js/responsive.bootstrap4.min.js")
+
+    script.
+        // Fonction de tri par date
+        var sortByDate = (date1, date2) => {
+            date1 = date1.split("/");
+            date2 = date2.split("/");
+            return new Date(date1[2], date1[1] - 1, date1[0]) - new Date(date2[2], date2[1] - 1, date2[0])
+        }
+        
+        jQuery.fn.dataTableExt.oSort["date-case-desc"] = (date1, date2) => sortByDate(date1, date2);
+        jQuery.fn.dataTableExt.oSort["date-case-asc"] = (date1, date2) => sortByDate(date2, date1);
+        
+        $(document).ready(() => $('#table').DataTable({
+            columnDefs: [
+                { sType: "date-case", targets: 1 }
+            ],
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+            //- responsive: true,
+            fixedHeader: true,
+        }));
+    ul
+        +table(titles_list, true)
