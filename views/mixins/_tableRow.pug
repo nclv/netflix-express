@@ -1,6 +1,7 @@
 mixin tableRow(title, type)
     tr
-        td= title.name
+        td
+            a(href=title.url) #{title.name}
         td= title.date
         if type
-            td= title.type ? "Seen" : 'Rated'
+            td= title.type

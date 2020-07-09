@@ -1,0 +1,30 @@
+extends layout
+
+block content
+    br
+    h1 #{title}
+
+    div(style='margin-left:20px;margin-top:20px')
+        form(method='POST' action='')
+            div.form-group
+                label(for='name') Nom de l'entrée:
+                input#name.form-control(type='text' placeholder="Albator, corsaire de l'espace" name='name' value=(undefined===created_title ? '' : created_title.name) required='true')
+                
+                label(for='date') Date:
+                input#date.form-control(type='text' placeholder='dd/mm/yyyy' name='date' value=(undefined===created_title ? '' : created_title.date) required='true')
+                
+                label(for='type') Type d'entrée:
+                select#type.form-control(type='select' placeholder='Seen or Rated' name='type' required='true')
+                    if (undefined===created_title)
+                        option(value='Seen') Seen
+                        option(value='Rated') Rated
+                    else
+                        option(value='Seen' selected=(created_title.type === "Seen" ? 'selected' : false)) Seen
+                        option(value='Rated' selected=(created_title.type === "Rated" ? 'selected' : false)) Rated
+            
+            button.btn.btn-primary(type='submit') Soumettre l'entrée
+
+        if errors 
+            ul
+                for error in errors
+                    li!= error.msg

@@ -1,0 +1,33 @@
+extends layout
+
+block content
+    br
+    p Affichage des détails de l'entrée #[em !{title_details.name}].
+    
+    div(style='margin-left:20px;margin-top:20px')
+        
+        dl
+            dt Identifiant
+            dd= title_details.id
+
+            dt Nom
+            dd= title_details.name
+
+            dt Type
+            dd= title_details.type
+
+            dt Date
+            dd= title_details.date
+
+            dt Date de création dans la database
+            dd= title_details.createdAt
+
+            dt Date de mise à jour dans la database
+            dd= title_details.updatedAt
+    
+    hr
+    p
+        a(href=title_details.url+'/delete') Supprimer l'entrée
+    p
+        a(href=title_details.url+'/update') Mise à jour de l'entrée
+

@@ -5,6 +5,13 @@ Netflix Express
 
 Placer les fichiers JSON dans le dossier `data/`. Les fichiers doivent être respectivement nommés `rated_titles.json` et `seen_titles.json`.
 
+Lancer directement le serveur et créer la database:
+```bash
+npm run serverstart
+```
+
+_OU_
+
 Commencer par créer la database et les modèles:
 ```bash
 node_modules/.bin/sequelize db:migrate  # create the table in the database
@@ -37,3 +44,6 @@ node_modules/.bin/sequelize db:seed:undo --seed "20200702122205-seed-title-rated
 
  - [x] Parse JSON to Mongodb NoSQL database with `mongoose` (See the first commits),
  - [x] Parse JSON to Sqlite SQL database with `sequelize`,
+ - [x] Connect the database and the server,
+ - [x] Visualize the database,
+ - [ ] Make some graphs,
