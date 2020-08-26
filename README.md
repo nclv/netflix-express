@@ -46,4 +46,5 @@ node_modules/.bin/sequelize db:seed:undo --seed "20200702122205-seed-title-rated
  - [x] Parse JSON to Sqlite SQL database with `sequelize`,
  - [x] Connect the database and the server,
  - [x] Visualize the database,
+ - [x] Add, remove and update entries,
  - [ ] Make some graphs,

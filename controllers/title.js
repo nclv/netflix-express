@@ -3,7 +3,7 @@ const moment = require('moment');
 
 const Title = require('../models').Title;
 
-exports.index = async (req, res) => {
+exports.index = async (req, res, next) => {
     var lim = 10;
     const promise_array = [Title.findAndCountAll({
         where: { type: true },
@@ -22,21 +22,17 @@ exports.index = async (req, res) => {
             rated_titles: rated_titles.rows,
             rated_titles_count: rated_titles.count,
         });
-    }).catch(err => {
-        console.log("Erreur du chargement des données", err);
-    });
+    }).catch(next);
 };
 
 // Display list of all Titles.
-exports.titles_list = (req, res) => {
+exports.titles_list = (req, res, next) => {
     Title.findAll().then(titles => {
         res.render("title_list", {
             title: "Entrées présentes dans la database",
             titles_list: titles,
         });
-    }).catch(err => {
-        console.log("Erreur du chargement des données", err);
-    });
+    }).catch(next);
 };
 
 // Display detail page for a specific Title.
@@ -50,9 +46,7 @@ exports.title_detail = function (req, res, next) {
         res.render('title_details', {
             title_details: result,
         });
-    }).catch(err => {
-        if (err) { return next(err); }
-    });
+    }).catch(next);
 };
 
 // Display Title create form on GET.
@@ -115,7 +109,7 @@ exports.title_create_post = [
                         // Title saved. Redirect to title detail page.
                         res.redirect(title.url);
                     } catch (err) {
-                        if (err) { return next(err); }
+                        return next(err);
                     }
                 }
             })
@@ -134,9 +128,7 @@ exports.title_delete_get = function (req, res) {
                 title_details: result,
             });
         }
-    }).catch(err => {
-        if (err) { return next(err); }
-    });
+    }).catch(next);
 };
 
 // Handle Title delete on POST.
@@ -144,9 +136,7 @@ exports.title_delete_post = function (req, res) {
     Title.findByPk(req.body.titleid).then(async (result) => {
         await result.destroy();
         res.redirect("/catalog/titles");
-    }).catch(err => {
-        if (err) { return next(err); }
-    });
+    }).catch(next);
 };
 
 // Display Title update form on GET.
@@ -161,9 +151,7 @@ exports.title_update_get = function (req, res) {
             title: "Mise à jour d'une entrée",
             created_title: result,
         });
-    }).catch(err => {
-        if (err) { return next(err); }
-    });
+    }).catch(next);
 };
 
 // Handle Title update on POST.
@@ -216,9 +204,7 @@ exports.title_update_post = [
                     type: req.body.type,
                 });
                 res.redirect(old_title.url);
-            }).catch(err => {
-                if (err) { return next(err); }
-            });
+            }).catch(next);
         }
     }
 ];
